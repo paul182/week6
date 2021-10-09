@@ -33,16 +33,16 @@ pipeline {
     stage('master') {
       when {
         expression {
-          return env.GIT_BRANCH == "origin/master"
+          return env.GIT_BRANCH == "master"
         }
       }
       steps {
         echo "I am a main branch"
       }
     }
-    stage("Compile") {
+    stage("prepare") {
       steps {
-        sh "./gradlew compileJava"
+        sh "chmod +x ./gradlew"
       }
     }
     stage("Unit test") {
