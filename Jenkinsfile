@@ -1,5 +1,3 @@
-pipeline {
-  agent any
   podTemplate(containers: [
     containerTemplate(
       name: 'gradle',
@@ -8,9 +6,9 @@ pipeline {
       args: '30d'
     ),
   ]) {
-    node{
+    node(POD_LABEL) {
       stage('Run pipeline against a gradle project') {
-        git 'https://github.com/paul182/week6'
+
         container('gradle') {
           stage('Build a gradle project') {
             sh '''
@@ -51,4 +49,3 @@ pipeline {
       }
     }
   }
-}
