@@ -8,16 +8,17 @@
   ]) {
     node(POD_LABEL) {
       stage('Run pipeline against a gradle project') {
-        when { not { branch 'playground' } }
         git 'https://github.com/paul182/week6'
         container('gradle') {
           stage('Build a gradle project') {
+            when { not { branch 'playground' } }
             sh '''
             chmod +x gradlew
             ./gradlew test 
             '''
           }
           stage("Code coverage") {
+            when { not { branch 'playground' } }
             sh '''
               ./gradlew jacocoTestCoverageVerification
               ./gradlew jacocoTestReport 
@@ -29,6 +30,7 @@
             ])
           }
           stage("Checkstyle") {
+            when { not { branch 'playground' } }
             script{
               try{
                 sh '''
