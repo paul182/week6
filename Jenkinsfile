@@ -1,13 +1,12 @@
 pipeline {
   agent {
     kubernetes {
-      yaml ''
-      '
+      yaml '''
       spec:
         containers:
         -name: gradle
-      image: gradle: 6.3 - jdk14 ''
-      '
+      image: gradle: 6.3 - jdk14 
+      '''
     }
   }
   stages {
