@@ -4,8 +4,8 @@ pipeline {
       yaml '''
       spec:
         containers:
-        -name: gradle
-         image: gradle:6.3-jdk14 
+        - name: gradle
+          image: gradle:6.3-jdk14 
      '''
     }
   }
