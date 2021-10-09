@@ -1,90 +1,50 @@
-pipeline {
-     agent any
-     triggers {
-          pollSCM('* * * * *')
-     }
-     stages {
-          stage("Compile") {
-               steps {
-                    sh "./gradlew compileJava"
-               }
-          }
-          stage("Unit test") {
-               steps {
-                    sh "./gradlew test"
-               }
+  podTemplate(containers: [
+    containerTemplate(
+      name: 'gradle',
+      image: 'gradle:6.3-jdk14',
+      command: 'sleep',
+      args: '30d'
+    ),
+  ]) {
+    node(POD_LABEL) {
+      stage('Run pipeline against a gradle project') {
+        git 'https://github.com/paul182/week6'
+        container('gradle') {
+          stage('Build a gradle project') {
+            sh '''
+            chmod +x gradlew
+            ./gradlew test 
+            '''
           }
           stage("Code coverage") {
-               steps {
-                    sh "./gradlew jacocoTestReport"
-                    sh "./gradlew jacocoTestCoverageVerification"
-               }
+            sh '''
+              ./gradlew jacocoTestCoverageVerification
+              ./gradlew jacocoTestReport 
+              '''
+            publishHTML(target: [
+              reportDir: 'build/reports/tests/test',
+              reportFiles: 'index.html',
+              reportName: "JaCoCo Code Coverage Report"
+            ])
           }
-          stage("Static code analysis") {
-               steps {
-                    sh "./gradlew checkstyleMain"
-               }
-          }
-          stage("Package") {
-               steps {
-                    sh "./gradlew build"
-               }
-          }
-
-          stage("Docker build") {
-               steps {
-                    sh "docker build -t leszko/calculator:${BUILD_TIMESTAMP} ."
-               }
-          }
-
-          stage("Docker login") {
-               steps {
-                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'docker-hub-credentials',
-                               usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                         sh "docker login --username $USERNAME --password $PASSWORD"
-                    }
-               }
-          }
-
-          stage("Docker push") {
-               steps {
-                    sh "docker push leszko/calculator:${BUILD_TIMESTAMP}"
-               }
-          }
-
-          stage("Update version") {
-               steps {
-                    sh "sed  -i 's/{{VERSION}}/${BUILD_TIMESTAMP}/g' calculator.yaml"
-               }
-          }
-          
-          stage("Deploy to staging") {
-               steps {
-                    sh "kubectl config use-context staging"
-                    sh "kubectl apply -f hazelcast.yaml"
-                    sh "kubectl apply -f calculator.yaml"
-               }
-          }
-
-          stage("Acceptance test") {
-               steps {
-                    sleep 60
-                    sh "chmod +x acceptance-test.sh && ./acceptance-test.sh"
-               }
-          }
-
-          stage("Release") {
-               steps {
-                    sh "kubectl config use-context production"
-                    sh "kubectl apply -f hazelcast.yaml"
-                    sh "kubectl apply -f calculator.yaml"
-               }
-          }
-          stage("Smoke test") {
-              steps {
-                  sleep 60
-                  sh "chmod +x smoke-test.sh && ./smoke-test.sh"
+          stage("Checkstyle") {
+            script{
+              try{
+                sh '''
+                pwd
+                  ./gradlew checkstyleMain
+                  '''
+              } catch (ex) {
+                echo "checkstyle fails"
               }
+            }
+            publishHTML(target: [
+              reportDir: 'build/reports/checkstyle',
+              reportFiles: 'main.html',
+              reportName: "JaCoCo checkstyle"
+            ])
           }
-     }
-}
+        }
+      }
+    }
+  }
