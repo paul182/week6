@@ -12,7 +12,6 @@
         container('gradle') {
           stage('Build a gradle project') {
             sh '''
-            ls -l
             chmod +x gradlew
             ./gradlew test 
             '''
