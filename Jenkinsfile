@@ -20,36 +20,21 @@ pipeline {
         echo env.GIT_LOCAL_BRANCH
       }
     }
-    stage('feature') {
-      when {
-        beforeAgent true
-        not {
-          branch 'master' 
-        }
-      }
-      steps {
-        echo "I am a feature branch"
-      }
-    }
-    stage('master') {
+    stage("prepare") {
       when {
           beforeAgent true
-          branch 'master' 
+          not {
+              branch 'playground' 
+          }
       }
-      steps {
-        echo "I am a main branch"
-      }
-    }
-    stage("prepare") {
       steps {
         sh "chmod +x ./gradlew"
       }
     }
     stage("Unit test") {
       when {
-        expression {
-          return env.GIT_BRANCH == "noop"
-        }
+          beforeAgent true
+          branch pattern: "feature", comparator: "REGEXP"
       }
       steps {
         sh "./gradlew test"
@@ -57,9 +42,8 @@ pipeline {
     }
     stage("Code coverage") {
       when {
-        expression {
-          return env.GIT_BRANCH == "noop"
-        }
+          beforeAgent true
+          branch 'master' 
       }
       steps {
         sh "./gradlew jacocoTestReport"
@@ -68,9 +52,8 @@ pipeline {
     }
     stage("Static code analysis") {
       when {
-        expression {
-          return env.GIT_BRANCH == "noop"
-        }
+          beforeAgent true
+          branch pattern: "feature", comparator: "REGEXP"
       }
       steps {
         sh "./gradlew checkstyleMain"
