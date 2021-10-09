@@ -22,8 +22,9 @@ pipeline {
     }
     stage('feature') {
       when {
-        expression {
-          return env.GIT_BRANCH == "origin/feature"
+        beforeAgent true
+        not {
+          branch 'master' 
         }
       }
       steps {
@@ -32,9 +33,8 @@ pipeline {
     }
     stage('master') {
       when {
-        expression {
-          return env.GIT_BRANCH == "master"
-        }
+          beforeAgent true
+          branch 'master' 
       }
       steps {
         echo "I am a main branch"
@@ -46,17 +46,32 @@ pipeline {
       }
     }
     stage("Unit test") {
+      when {
+        expression {
+          return env.GIT_BRANCH == "noop"
+        }
+      }
       steps {
         sh "./gradlew test"
       }
     }
     stage("Code coverage") {
+      when {
+        expression {
+          return env.GIT_BRANCH == "noop"
+        }
+      }
       steps {
         sh "./gradlew jacocoTestReport"
         sh "./gradlew jacocoTestCoverageVerification"
       }
     }
     stage("Static code analysis") {
+      when {
+        expression {
+          return env.GIT_BRANCH == "noop"
+        }
+      }
       steps {
         sh "./gradlew checkstyleMain"
       }
