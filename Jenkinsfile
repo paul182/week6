@@ -80,7 +80,7 @@ pipeline {
           sh "echo 'FROM openjdk:8-jre' > Dockerfile"
           sh "echo 'COPY /mnt/calculator-0.0.1-SNAPSHOT.jar app.jar' >> Dockerfile"
           sh '''echo 'ENTRYPOINT ["java", "-jar", "app.jar"]' >> Dockerfile
-                /kaniko/executor --context 'pwd' --destination paul182/hello-kaniko:1.0
+                /kaniko/executor --destination paul182/calculator-env.GIT_BRANCH:1.0
               '''
         }
       }
