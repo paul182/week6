@@ -1,41 +1,9 @@
 pipeline {
   agent {
     kubernetes {
-      yaml '''
-      spec:
-        containers:
-        - name: gradle
-          image: gradle:6.3-jdk14 
-          command:
-          - sleep
-          args:
-          - 30d
-          volumeMounts:
-          - name: shared-storage
-            mountPath: /mnt
-        - name: kaniko
-          image: gcr.io/kaniko-project/executor:debug
-          command:
-          - sleep
-          args:
-          - 30d
-          volumeMounts:
-          - name: shared-storage
-            mountPath: /mnt
-          - name: kaniko-secret
-            mountPath: /kaniko/.docker
-        restartPolicy: Never
-        volumes:
-        - name: shared-storage
-          persistentVolumeClaim:
-            claimName: jenkins-pv-claim
-        - name: kaniko-secret
-          secret:
-            secretName: dockercred
-            items:
-            - key: .dockerconfigjson
-              path: config.json
-     '''
+      idleMinutes 5  // how long the pod will live after no jobs have run on it
+      yamlFile 'build-pod.yaml'
+      defaultContainer 'gradle'  // define a default container if more than a few stages use it, will default to jnlp container
     }
   }
   stages {
@@ -46,78 +14,59 @@ pipeline {
       }
     }
     stage("prepare") {
-          container('gradle'){
-            stage("prepare 1") {
       when {
           beforeAgent true
           not {
               branch 'playground' 
           }
       }
-      
-        steps {
-          sh "chmod +x ./gradlew"
-        }
-          }
-          }
+      steps {
+        sh "chmod +x ./gradlew"
+      }
     }
-          
     stage("Unit test") {
-                container('gradle'){
-            stage(" 1") {
       when {
           beforeAgent true
           not {
               branch 'playground' 
           }
       }
-        steps {
-          sh "./gradlew test"
-        }
-            }}
+      steps {
+        sh "./gradlew test"
+      }
     }
     stage("Code coverage") {
-                container('gradle'){
-            stage(" 2") {
       when {
           beforeAgent true
           branch 'master' 
       }
-        steps {
-          sh "./gradlew jacocoTestReport"
-          sh "./gradlew jacocoTestCoverageVerification"
-        }
-            }}
+      steps {
+        sh "./gradlew jacocoTestReport"
+        sh "./gradlew jacocoTestCoverageVerification"
+      }
     }
     stage("Static code analysis") {
-                container('gradle'){
-            stage(" 3") {
       when {
           beforeAgent true
           not {
               branch 'playground' 
           }
       }
-        steps {
-          sh "./gradlew checkstyleMain"
-        }
-            }}
+      steps {
+        sh "./gradlew checkstyleMain"
+      }
     }
     stage("Build gradle Project") {
-                container('gradle'){
-            stage("4") {
       when {
           beforeAgent true
           not {
               branch 'playground' 
           }
       }
-
-        steps {
-          sh "./gradlew build"
-          sh "mv ./build/libs/calculator-0.0.1-SNAPSHOT.jar /mnt"
-        }
-            }}
+      steps {
+        sh "./gradlew build"
+        sh "mv ./build/libs/calculator-0.0.1-SNAPSHOT.jar /mnt"
+      }
     }
   }
 }
