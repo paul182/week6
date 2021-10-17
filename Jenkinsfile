@@ -39,7 +39,6 @@ pipeline {
     }
   }
   stages {
-          container('gradle'){
     stage('debug') {
       steps {
         echo env.GIT_BRANCH
@@ -47,7 +46,8 @@ pipeline {
       }
     }
     stage("prepare") {
-
+          container('gradle'){
+            stage("prepare 1") {
       when {
           beforeAgent true
           not {
@@ -58,9 +58,13 @@ pipeline {
         steps {
           sh "chmod +x ./gradlew"
         }
+          }
+          }
     }
           
     stage("Unit test") {
+                container('gradle'){
+            stage(" 1") {
       when {
           beforeAgent true
           not {
@@ -70,8 +74,11 @@ pipeline {
         steps {
           sh "./gradlew test"
         }
+            }}
     }
     stage("Code coverage") {
+                container('gradle'){
+            stage(" 2") {
       when {
           beforeAgent true
           branch 'master' 
@@ -80,8 +87,11 @@ pipeline {
           sh "./gradlew jacocoTestReport"
           sh "./gradlew jacocoTestCoverageVerification"
         }
+            }}
     }
     stage("Static code analysis") {
+                container('gradle'){
+            stage(" 3") {
       when {
           beforeAgent true
           not {
@@ -91,8 +101,11 @@ pipeline {
         steps {
           sh "./gradlew checkstyleMain"
         }
+            }}
     }
     stage("Build gradle Project") {
+                container('gradle'){
+            stage("4") {
       when {
           beforeAgent true
           not {
@@ -104,8 +117,7 @@ pipeline {
           sh "./gradlew build"
           sh "mv ./build/libs/calculator-0.0.1-SNAPSHOT.jar /mnt"
         }
-    
+            }}
     }
-          }
   }
 }
