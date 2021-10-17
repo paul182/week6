@@ -78,10 +78,10 @@ pipeline {
       steps {
         container('kaniko') { 
           sh '''
-              FILE_NAME = 'calculator:1.0'
+              FILE_NAME='calculator:1.0'
               if [ $env.GIT_BRANCH == 'feature' ]
               then
-                FILE_NAME = 'calculator-feature:0.1'
+                FILE_NAME='calculator-feature:0.1'
               fi
              '''
           sh "mv /mnt/calculator-0.0.1-SNAPSHOT.jar app.jar ."
