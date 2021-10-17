@@ -52,8 +52,10 @@ pipeline {
               branch 'playground' 
           }
       }
-      steps {
-        sh "chmod +x ./gradlew"
+      container('gradle'){
+        steps {
+          sh "chmod +x ./gradlew"
+        }
       }
     }
     stage("Unit test") {
@@ -63,8 +65,10 @@ pipeline {
               branch 'playground' 
           }
       }
-      steps {
-        sh "./gradlew test"
+      container('gradle'){
+        steps {
+          sh "./gradlew test"
+        }
       }
     }
     stage("Code coverage") {
@@ -72,9 +76,11 @@ pipeline {
           beforeAgent true
           branch 'master' 
       }
-      steps {
-        sh "./gradlew jacocoTestReport"
-        sh "./gradlew jacocoTestCoverageVerification"
+      container('gradle'){
+        steps {
+          sh "./gradlew jacocoTestReport"
+          sh "./gradlew jacocoTestCoverageVerification"
+        }
       }
     }
     stage("Static code analysis") {
@@ -84,8 +90,10 @@ pipeline {
               branch 'playground' 
           }
       }
-      steps {
-        sh "./gradlew checkstyleMain"
+      container('gradle'){
+        steps {
+          sh "./gradlew checkstyleMain"
+        }
       }
     }
     stage("Build gradle Project") {
@@ -95,9 +103,11 @@ pipeline {
               branch 'playground' 
           }
       }
-      steps {
-        sh "./gradlew build"
-        sh "mv ./build/libs/calculator-0.0.1-SNAPSHOT.jar /mnt"
+      container('gradle'){
+        steps {
+          sh "./gradlew build"
+          sh "mv ./build/libs/calculator-0.0.1-SNAPSHOT.jar /mnt"
+        }
       }
     }
   }
