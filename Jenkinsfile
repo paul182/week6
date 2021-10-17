@@ -80,7 +80,7 @@ pipeline {
           sh '''
               FILE_NAME='calculator:1.0'
               echo $GIT_BRANCH
-              if [ '$GIT_BRANCH' = 'feature' ]; then
+              if [ $GIT_BRANCH = 'feature' ]; then
                 FILE_NAME='calculator-feature:0.1'
               fi
               mv /mnt/calculator-0.0.1-SNAPSHOT.jar /workspace/calculator-0.0.1-SNAPSHOT.jar
