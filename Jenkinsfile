@@ -77,12 +77,9 @@ pipeline {
       }
       steps {
         container('kaniko') { 
-          sh "ls -l ./"
-          sh "ls -l /mnt"
           sh "echo 'FROM openjdk:8-jre' > Dockerfile"
-          sh "echo 'COPY ./calculator-0.0.1-SNAPSHOT.jar app.jar' >> Dockerfile"
+          sh "echo 'COPY /mnt/calculator-0.0.1-SNAPSHOT.jar app.jar' >> Dockerfile"
           sh '''echo 'ENTRYPOINT ["java", "-jar", "app.jar"]' >> Dockerfile
-                mv /mnt/calculator-0.0.1-SNAPSHOT.jar .
                 /kaniko/executor --context 'pwd' --destination paul182/hello-kaniko:1.0
               '''
         }
