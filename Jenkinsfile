@@ -12,7 +12,7 @@ pipeline {
           - 30d
           volumeMounts:
           - name: shared-storage
-            mountPath: /tmp
+            mountPath: /mnt
         - name: kaniko
           image: gcr.io/kaniko-project/executor:debug
           command:
@@ -21,7 +21,7 @@ pipeline {
           - 30d
           volumeMounts:
           - name: shared-storage
-            mountPath: /tmp
+            mountPath: /mnt
           - name: kaniko-secret
             mountPath: /kaniko/.docker
         restartPolicy: Never
