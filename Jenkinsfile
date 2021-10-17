@@ -77,10 +77,18 @@ pipeline {
       }
       steps {
         container('kaniko') { 
+          sh '''
+              FILE_NAME = 'calculator:1.0'
+              if [ $env.GIT_BRANCH == 'feature' ]
+              then
+                FILE_NAME = 'calculator-feature:0.1'
+              fi
+             '''
+          sh "mv /mnt/calculator-0.0.1-SNAPSHOT.jar app.jar ."
           sh "echo 'FROM openjdk:8-jre' > Dockerfile"
-          sh "echo 'COPY /mnt/calculator-0.0.1-SNAPSHOT.jar app.jar' >> Dockerfile"
+          sh "echo 'COPY calculator-0.0.1-SNAPSHOT.jar app.jar' >> Dockerfile"
           sh '''echo 'ENTRYPOINT ["java", "-jar", "app.jar"]' >> Dockerfile
-                /kaniko/executor --destination paul182/calculator-env.$GIT_BRANCH:1.0
+                /kaniko/executor --destination paul182/$FILE_NAME
               '''
         }
       }
